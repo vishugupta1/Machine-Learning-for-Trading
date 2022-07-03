@@ -21,25 +21,28 @@ GT honor code violation.
   		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
 -----do not edit anything above this line---  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
   		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
-Student Name: TVishu Gupta (replace with your name)  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
+Student Name: Vishu Gupta (replace with your name)  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
 GT User ID: vgupta359 (replace with your User ID)  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
-GT ID: 900897987 (replace with your GT ID)  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
-"""  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
-  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
-import datetime as dt  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
-import os  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
-  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
-import numpy as np  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
-  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
-import pandas as pd  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
-from util import get_data, plot_data, get_orders_data_file
-  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
-  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
+GT ID: 903717362 (replace with your GT ID)  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
+"""
+
+import datetime as dt
+import os
+
+import numpy as np
+
+import pandas as pd
+from util import get_data, plot_data
+
+def author():
+  return 'vgupta359' # replace tb34 with your Georgia Tech username.
+
+
 def compute_portvals(  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
-    orders_file="./orders/orders-01.csv",
-    start_val=1000000,  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
-    commission=9.95,  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
-    impact=0.005,  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
+    orders_file="./orders/orders.csv",
+    start_val=1000000,
+    commission=9.95,
+    impact=0.005,
 ):  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
     """  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
     Computes the portfolio values.  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
@@ -68,8 +71,11 @@ def compute_portvals(
     # portvals = portvals[["IBM"]]  # remove SPY
     # rv = pd.DataFrame(index=portvals.index, data=portvals.values)
 
+    # References:
     # https://www.adamsmith.haus/python/answers/how-to-sort-a-pandas-dataframe-by-date-in-python#:~:text=Use%20pandas.,sort%20a%20DataFrame%20by%20date
     # https://towardsdatascience.com/how-to-read-csv-file-using-pandas-ab1f5e7e7b58
+
+
     current_value = start_val
     df = pd.read_csv(orders_file)
     df = df.sort_values(by='Date')
@@ -86,9 +92,9 @@ def compute_portvals(
     dates = pd.date_range(dts[0], dts[-1])
 
     data = get_data(syms, dates, False)
-    data = data.loc[dts]
-    print(df)
-    print(data)
+    #data = data.loc[dts]
+    # print(df)
+    # print(data)
 
     # df_dates = df['Date']
     # df_symbol = df['Symbol']
@@ -101,30 +107,58 @@ def compute_portvals(
         temp.append(temp1)
 
     keeptrack = pd.DataFrame(temp, columns=['Symbols', 'Shares', 'Avg Price'])
-    print(keeptrack)
+    symbols_keys = keeptrack.loc[:,'Symbols']
+    keeptrack = keeptrack.set_index('Symbols')
+    #print(keeptrack)
 
+    sol = []
+    for date in dts:
+        temp1 = [date, 0]
+        sol.append(temp1)
+    solution = pd.DataFrame(sol, columns=['date', 'value'])
+    #print(solution)
+    solution = solution.set_index('date')
+
+    # iterate through each day
+    # print(df)
     for i in range(len(df)):
         share = df.loc[i,'Shares']
         symbol = df.loc[i,'Symbol']
         order = df.loc[i,'Order']
         date = df.loc[i,'Date']
         price = data.loc[date,symbol]
-        costorgain = price * share
+        costorgain = price*share
         if(order == 'BUY'):
             current_value=current_value-costorgain
+            keeptrack.at[symbol,'Shares'] = keeptrack.loc[symbol,'Shares']+share
+            total = current_value+GetValueOfStocks(keeptrack,data,date,symbols_keys)
+            solution.at[date,'value'] = total
+        else:
+            current_value = current_value+costorgain
+            keeptrack.at[symbol, 'Shares'] = keeptrack.loc[symbol, 'Shares'] - share
+            total = current_value+GetValueOfStocks(keeptrack,data,date,symbols_keys)
+            solution.at[date, 'value'] = total
 
-
-
-
-    rv = 2
-
-
-  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
-    return rv  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
+    #print(solution)
+    portvals = solution
     return portvals  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
   		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
   		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
-def test_code():  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
+
+def GetValueOfStocks(keeptrack, prices, date, symbols_keys):
+    total = 0
+    #print(keeptrack,prices,date)
+    for symbol in symbols_keys:
+        shares = keeptrack.loc[symbol,'Shares']
+        price = prices.loc[date, symbol]
+        total = total + (price*shares)
+    #print(total)
+    return total
+
+
+
+
+def test_code():
     """  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
     Helper function to test code  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
     """  		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
@@ -178,6 +212,4 @@ def test_code():
   		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
   		  	   		  	  			  		 			 	 	 		 		 	 		 		 	 		  	 	 			  	 
 if __name__ == "__main__":
-    print("Hello world")
-    compute_portvals()
-    #test_code()
+    test_code()
